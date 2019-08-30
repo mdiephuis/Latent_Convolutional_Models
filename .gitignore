@@ -1,3 +1,6 @@
+latent_temp_dir/
+*.npy
+
 # Maurits
 *.org
 todo.txt

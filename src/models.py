@@ -48,10 +48,10 @@ class EncDecCelebA(nn.Module):
         self.convT1 = ConvTrBatchLeaky(0.2, 1024 + 1024, 512, 4, 2, 1, bias=bias)  # 8
         self.convT2 = ConvTrBatchLeaky(0.2, 512 + 512, 512, 4, 2, 1, bias=bias)  # 16
         self.convT3 = ConvTrBatchLeaky(0.2, 512, 256, 4, 2, 1, bias=bias)  # 32
-
         self.convT4 = ConvTrBatchLeaky(0.2, 256, 128, 4, 2, 1, bias=bias)  # 64
-        self.convT5 = ConvTrBatchLeaky(0.2, 128, 64, 3, 1, 1, bias=bias)  # 128
-        self.convT6 = ConvTrBatchLeaky(0.2, 64, 32, 3, 1, 1, 1, bias=bias)  # 128
+
+        self.conv5 = ConvBatchLeaky(0.2, 128, 64, 3, 1, 1, bias=bias)  # 128
+        self.conv6 = ConvBatchLeaky(0.2, 64, 32, 3, 1, 1, 1, bias=bias)  # 128
 
         self.convT7 = nn.Conv2d(32, 3, 3, 1, 1, 1, bias=bias)
         self.upsamp = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
@@ -77,8 +77,8 @@ class EncDecCelebA(nn.Module):
 
         x = self.upsamp(x)
 
-        x = self.convT5(x)  # 128
-        x = self.convT6(x)  # 128
+        x = self.conv5(x)  # 128
+        x = self.conv6(x)  # 128
         x = F.sigmoid(self.convT7(x))  # 128
 
         return x

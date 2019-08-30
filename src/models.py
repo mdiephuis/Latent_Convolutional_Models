@@ -23,7 +23,7 @@ class ConvBatchLeaky(nn.Conv2d):
 class ConvTrBatchLeaky(nn.ConvTranspose2d):
     def __init__(self, lr_slope, *args, **kwargs):
         super(ConvTrBatchLeaky, self).__init__(*args, **kwargs)
-        batch_dim = self.weight.data.size(0)
+        batch_dim = self.weight.data.size(1)
         self.bn = nn.BatchNorm2d(batch_dim)
         self.lr = nn.LeakyReLU(lr_slope)
 
@@ -74,6 +74,7 @@ class EncDecCelebA(nn.Module):
         x = self.convT2(x)  # 16
         x = self.convT3(x)  # 32
         x = self.convT4(x)  # 64
+
         x = self.upsamp(x)
 
         x = self.convT5(x)  # 128
@@ -92,12 +93,10 @@ class Latent4LSND(nn.Module):
         super(Latent4LSND, self).__init__()
         self.lr_slope = lr_slope
 
-        self.conv1 = nn.Conv2d(2, 8, 3, 1, 0, 1, bias=False)  # 80
-        self.conv1_bn = nn.BatchNorm2d(8)
-        self.conv2 = nn.Conv2d(8, 16, 3, 1, 0, 1, bias=False)  # 76
-        self.conv2_bn = nn.BatchNorm2d(16)
-        self.conv3 = nn.Conv2d(16, 32, 3, 1, 0, 1, bias=False)  # 72
-        self.conv3_bn = nn.BatchNorm2d(32)
+        self.conv1 = ConvBatchLeaky(self.lr_slope, 2, 8, 3, 1, 0, 1, bias=False)  # 80
+        self.conv2 = ConvBatchLeaky(self.lr_slope, 8, 16, 3, 1, 0, 1, bias=False)  # 76
+        self.conv3 = ConvBatchLeaky(self.lr_slope, 16, 32, 3, 1, 0, 1, bias=False)  # 72
+
         self.conv4 = nn.Conv2d(32, 64, 3, 1, 0, 1, bias=False)  # 68
 
     def restrict(self, min_val, max_val):
@@ -108,9 +107,9 @@ class Latent4LSND(nn.Module):
 
     def forward(self, x):
 
-        x = F.leaky_relu(self.conv1_bn(self.conv1(x)), self.lr_slope)
-        x = F.leaky_relu(self.conv2_bn(self.conv2(x)), self.lr_slope)
-        x = F.leaky_relu(self.conv3_bn(self.conv3(x)), self.lr_slope)
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
         x = F.leaky_relu(self.conv4(x), self.lr_slope)
 
         return x

@@ -19,9 +19,9 @@ RESTRICT = True
 L2_W = 0.0
 RESTRICT_VAL = 0.01
 fname = "train_LCM"
-NUM_TRAIN_SAMPLES = 150000
+NUM_TRAIN_SAMPLES = 500
 
-LOG_DIR = '../runs/LCM_CelebA/'
+LOG_DIR = '../runs/'
 
 MODEL_NAME = 'CelebA150k_LCM'
 
@@ -34,7 +34,7 @@ PREV_EPOCH = None
 NUM_EPOCHS = 150000
 SAVE_EVERY = 15000
 
-use_cuda = True
+use_cuda = False
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 device = torch.device("cuda:0" if torch.cuda.is_available() and use_cuda else "cpu")
@@ -52,7 +52,7 @@ np.save(MODEL_NAME + '_commoninput', s.data.numpy())
 
 writer = SummaryWriter(log_dir=LOG_DIR)
 
-dataset_folder = '../celebA_split/train/'
+dataset_folder = '/data/CelebA/celebA_redux_500/'
 
 data_reader = DataReader_Disk(dataset_folder=dataset_folder,
                               device=device,

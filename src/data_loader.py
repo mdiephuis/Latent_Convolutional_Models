@@ -1,19 +1,13 @@
 import numpy as np
-from tensorboardX import SummaryWriter
-import scipy.misc
 from os import listdir
 from os.path import isfile, join
 import random
 import torch
-import latent_models as lm
-from skimage.io import imread, imsave
+import models as lm
 from skimage.transform import resize
-import skimage.transform
-import time
+from skimage.io import imread
 import os
 import warnings
-
-
 
 
 class DataReader_Disk():
@@ -40,7 +34,7 @@ class DataReader_Disk():
         self.end = 0
         self.start = 0
         self.model_name = model_name
-        self.device=device
+        self.device = device
         self.temp_latent_dir = './latent_temp_dir/' + self.model_name + '_latent_temp/'
         if not os.path.exists(self.temp_latent_dir):
             os.makedirs(self.temp_latent_dir)
@@ -54,12 +48,11 @@ class DataReader_Disk():
         self.img_size = img_size
 
     def load(self, latent_net_name,
-            num_epoch=None,
-            saved_model_name=None,
-            num_load=None,
-            same_seed=42,
-            latent_dir=None):
-
+             num_epoch=None,
+             saved_model_name=None,
+             num_load=None,
+             same_seed=42,
+             latent_dir=None):
         """
           This method loads with each image name a corresponding network_id. This network_id is used to load and save the appropriate networks.
 
@@ -98,7 +91,7 @@ class DataReader_Disk():
                 latent_net.load_state_dict(torch.load(latent_dir + saved_model_name + "_latentnet_" + str(num_epoch) + '_' + str(self.num_samples)))
             torch.save(latent_net.state_dict(), self.temp_latent_dir + "temp_latent_net_" + str(self.num_samples))
             self.data_lst.append([img_name, self.num_samples])
-            self.data_idx.append(np.random.randint(0, self.img_size - 20, size=(5,2)))
+            self.data_idx.append(np.random.randint(0, self.img_size - 20, size=(5, 2)))
             self.num_samples += 1
             if num_epoch is None:
                 print("Networks loaded: ", self.num_samples)
@@ -118,8 +111,6 @@ class DataReader_Disk():
         for i in range(num_nets):
             torch.save(nets[i].state_dict(), self.temp_latent_dir + "temp_latent_net_" + str(net_ids[i]))
 
-
-
     def get_imgs(self, img_list):
         data_out = None
         for img_name in img_list:
@@ -130,9 +121,9 @@ class DataReader_Disk():
                 inputs = np.repeat(inputs, 3, -1)
                 if inputs.shape[-1] != 3:
                     raise ValueError("Input must have last dimension as 3")
-            inputs = np.transpose(inputs, [2,0,1])
+            inputs = np.transpose(inputs, [2, 0, 1])
             inputs = np.expand_dims(inputs, 0)
-            inputs = (inputs - inputs.min())/(inputs.max() - inputs.min())
+            inputs = (inputs - inputs.min()) / (inputs.max() - inputs.min())
             inputs = torch.from_numpy(inputs).float()
             if data_out is None:
                 data_out = inputs
@@ -164,7 +155,6 @@ class DataReader_Disk():
         latent_nets = self.get_nets(latent_net_ids)
         data_out = data_out.to(self.device)
         return data_out, latent_nets, latent_net_ids
-
 
     def get_batch_from(self, start, batch_size=10):
         """
@@ -202,7 +192,7 @@ class DataReader_Disk():
           """
         self.save_nets(latent_nets, latent_nets_ids)
 
-    def save_latent_net(self, latent_dir ,name):
+    def save_latent_net(self, latent_dir, name):
         """
           Saves the latent networks in `latent_dir` to create a model checkpoint.
           Parameters:
